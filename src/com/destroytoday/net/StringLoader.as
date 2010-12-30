@@ -1,4 +1,7 @@
 package com.destroytoday.net {
+	import flash.events.Event;
+	import flash.net.URLLoader;
+	
 	import org.osflash.signals.Signal;
 	
 	/**
@@ -13,6 +16,11 @@ package com.destroytoday.net {
 		
 		public function get data():String {
 			return _data;
+		}
+		
+		override protected function initLoader():void
+		{
+			_loader = new URLLoader();
 		}
 
 		override protected function instantiateSignals():void {
@@ -33,6 +41,36 @@ package com.destroytoday.net {
 		
 		override protected function disposeData():void {
 			_data = null;
+		}
+		
+		override public function cancel():void
+		{
+			super.cancel();
+			
+			var urlLoader:URLLoader = _loader as URLLoader;
+			urlLoader.close();
+		}
+		
+		override public function dispose():void
+		{
+			super.dispose();
+			
+			var urlLoader:URLLoader = _loader as URLLoader;
+			urlLoader.data = null;
+		}
+		
+		override protected function completeHandler(event:Event):void
+		{
+			var urlLoader:URLLoader = _loader as URLLoader;
+			processData(urlLoader.data);
+		}
+		
+		override public function load(url:String=null, parameters:Object=null):void
+		{
+			super.load(url, parameters);
+			
+			var urlLoader:URLLoader = _loader as URLLoader;
+			urlLoader.load(request);
 		}
 	}
 }

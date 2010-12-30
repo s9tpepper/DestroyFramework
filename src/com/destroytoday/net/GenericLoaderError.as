@@ -21,6 +21,8 @@ package com.destroytoday.net {
 		
 		public static const CANCEL:String = "GenericLoaderError.CANCEL";
 		
+		public static const INSUFFICIENT_UTF_BYTES_LOADED:String = "GenericLoaderError.INSUFFICIENT_UTF_BYTES_LOADED"; 
+		
 		/**
 		 * @private
 		 */		

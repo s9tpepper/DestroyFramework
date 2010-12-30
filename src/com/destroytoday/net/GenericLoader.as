@@ -1,5 +1,6 @@
 package com.destroytoday.net {
 	import flash.events.Event;
+	import flash.events.EventDispatcher;
 	import flash.events.HTTPStatusEvent;
 	import flash.events.IOErrorEvent;
 	import flash.events.SecurityErrorEvent;
@@ -38,7 +39,7 @@ package com.destroytoday.net {
 		/**
 		 * @private 
 		 */		
-		protected var _loader:URLLoader;
+		protected var _loader:EventDispatcher;
 		
 		/**
 		 * @private 
@@ -85,9 +86,15 @@ package com.destroytoday.net {
 		/**
 		 * Instantiates the StringLoader class.
 		 */		
-		public function GenericLoader():void {
+		public function GenericLoader():void
+		{
+			init();
+		}
+		
+		protected function init():void
+		{
 			// instantiate instances
-			_loader = new URLLoader();
+			initLoader();
 			
 			// add listeners
 			_loader.addEventListener(Event.COMPLETE, completeHandler);
@@ -95,6 +102,15 @@ package com.destroytoday.net {
 			_loader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, errorHandler);
 			
 			instantiateSignals();
+		}
+		
+		/**
+		 * Starts the loader object. This method must be overridden and implemented to use the right loader object, URLLoader, Loader, URLStream, etc.
+		 */
+		protected function initLoader():void
+		{
+			//_loader = new EventDispatcher();
+			// This method must be overridden and implemented to use the right loader object, URLLoader, Loader, URLStream, etc.
 		}
 		
 		//
@@ -130,10 +146,14 @@ package com.destroytoday.net {
 		//
 		
 		/**
-		 * The URLLoader used to perform the load.
+		 * The loader object used to perform the load, this method returns an
+		 * EventDispatcher.  Each GenericLoader sub-class should implement its own
+		 * getter, such as public function get stringLoader():StringLoader to 
+		 * access it by strong type.
+		 * 
 		 * @return 
 		 */		
-		public function get loader():URLLoader {
+		public function get loader():EventDispatcher {
 			return _loader;
 		}
 		
@@ -297,8 +317,6 @@ package com.destroytoday.net {
 				request.data = parameters;
 			}
 			
-			_loader.load(request);
-			
 			loading = true;
 			
 			if (_currentRetryCount == 0) {
@@ -314,7 +332,6 @@ package com.destroytoday.net {
 			
 			loading = false;
 			
-			_loader.close ();
 			_errorSignal.dispatch(this, GenericLoaderError.CANCEL, null);
 		}
 		
@@ -335,7 +352,7 @@ package com.destroytoday.net {
 			_responseHeaders = null;
 			_currentRetryCount = 0;
 			_retryCount = 0;
-			_loader.data = null;
+			
 			if (_request) {
 				_request.method = URLRequestMethod.GET;
 				_request.data = null;
@@ -348,11 +365,14 @@ package com.destroytoday.net {
 		 * @param event
 		 */		
 		protected function completeHandler(event:Event):void {
-			var success:Boolean;
-			
+			// Implement in subclasses to handler complete event appropriately
+		}
+		
+		protected function processData(rawData:Object):void
+		{
 			loading = false;
 			
-			if (parseData(loader.data)) {
+			if (parseData(rawData)) {
 				dispatchData();
 			} else {
 				// retry if allowed
@@ -363,6 +383,7 @@ package com.destroytoday.net {
 				}
 			}
 		}
+		
 		
 		/**
 		 * @private

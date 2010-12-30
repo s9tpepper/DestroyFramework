@@ -56,5 +56,43 @@ package com.destroytoday.net {
 			
 			_data = null;
 		}
+		
+		
+		
+		
+		override protected function initLoader():void
+		{
+			_loader = new URLLoader();
+		}
+		
+		override protected function completeHandler(event:Event):void
+		{
+			var urlLoader:URLLoader = _loader as URLLoader;
+			processData(urlLoader.data);
+		}
+		
+		override public function load(url:String=null, parameters:Object=null):void
+		{
+			super.load(url, parameters);
+			
+			var urlLoader:URLLoader = _loader as URLLoader;
+			urlLoader.load(request);
+		}
+		
+		override public function cancel():void
+		{
+			super.cancel();
+			
+//			var urlLoader:URLLoader = _loader as URLLoader;
+//			if (urlLoader) urlLoader.close();
+		}
+		
+		override public function dispose():void
+		{
+			super.dispose();
+			
+			var urlLoader:URLLoader = _loader as URLLoader;
+			urlLoader.data = null;
+		}
 	}
 }
